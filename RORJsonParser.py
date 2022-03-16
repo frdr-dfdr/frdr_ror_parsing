@@ -35,7 +35,7 @@ def main():
                 ror_overrides[row["id"]] = {"name_en": row["name_en"], "name_fr": row["name_fr"], "altnames": row["altnames"]}
 
     # Write affiliation metadata to csv file
-    column_names = ["id", "country_code", "name_en", "name_fr", "altnames", "tags"]
+    column_names = ["id", "country_code", "name_en", "name_fr", "altnames", "tags", "type"]
     output_filename = "affiliation_metadata_frdr.csv"
     output_filepath = "output_data/" + output_filename
 
@@ -50,6 +50,9 @@ def main():
             altnames = affiliation["aliases"] + affiliation["acronyms"]
             for label in affiliation["labels"]:
                 altnames.append(label["label"])
+            type = "Unknown"
+            if "types" in affiliation and len(affiliation["types"]) == 1:
+                type = affiliation["types"][0]
 
             # Add overrides to ROR data
             if affiliation["id"] in ror_overrides:
@@ -84,14 +87,14 @@ def main():
             altnames = "||".join(list(set(altnames)))
 
             # Determine tags
-            # TODO - if we need to exclude specific orgs: add a "Signup" indicator to the "overrides" file and use it here
             tags = ""
             if affiliation["country"]["country_code"] == "CA" and "Company" not in affiliation["types"]:
                 # Canadian organizations that are not type "Company" appear in registration form
                 tags = "Signup"
 
             csvwriter.writerow({"id": affiliation["id"], "country_code": affiliation["country"]["country_code"],
-                                "name_en": name_en, "name_fr": name_fr, "altnames": altnames, "tags": tags})
+                                "name_en": name_en, "name_fr": name_fr, "altnames": altnames, "tags": tags,
+                                "type": type})
 
 if __name__ == "__main__":
     main()
